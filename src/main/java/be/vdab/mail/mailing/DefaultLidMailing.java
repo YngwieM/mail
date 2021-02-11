@@ -2,22 +2,29 @@ package be.vdab.mail.mailing;
 
 import be.vdab.mail.domain.Lid;
 import be.vdab.mail.exceptions.KanMailNietZendenException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
 
-// enkele imports
 @Component
 class DefaultLidMailing implements LidMailing {
     private final JavaMailSender sender;
-    DefaultLidMailing(JavaMailSender sender) {
+    private final String emailAdresWebMaster;
+
+
+    DefaultLidMailing(JavaMailSender sender,
+                      @Value("${emailAdresWebMaster}") String emailAdresWebMaster) {
         this.sender = sender;
+        this.emailAdresWebMaster = emailAdresWebMaster;
     }
     @Override
+//    @Async  //werkt niet, Hoofdstuk 9
     public void stuurMailNaRegistratie(Lid lid, String ledenURL) {
         try {
             var message = sender.createMimeMessage();
@@ -33,4 +40,19 @@ class DefaultLidMailing implements LidMailing {
             throw new KanMailNietZendenException(ex);
         }
     }
+
+    @Override
+    public void stuurMailMetAantalLeden(long aantalLeden) {
+        try {
+            var message = new SimpleMailMessage();
+            message.setTo(emailAdresWebMaster);
+            message.setSubject("Aantal Leden");
+            message.setText(aantalLeden + " leden");
+            sender.send(message);
+        } catch (MailException ex) {
+            throw new KanMailNietZendenException(ex);
+        }
+    }
+
+
 }
