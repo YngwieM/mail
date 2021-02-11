@@ -2,7 +2,7 @@ package be.vdab.mail.controllers;
 
 import be.vdab.mail.domain.Lid;
 import be.vdab.mail.exceptions.KanMailNietZendenException;
-import be.vdab.mail.services.LidService;
+
 
 
 import org.slf4j.Logger;
@@ -18,7 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
+import be.vdab.mail.services.LidService;
 
 
 @Controller
@@ -57,5 +57,12 @@ class LidController {
     @GetMapping("nietgeregistreerd")
     public String nietGeregistreerd() {
         return "nietgeregistreerd";
+    }
+
+    @GetMapping("{id}")
+    public ModelAndView info(@PathVariable long id) {
+        var modelAndView = new ModelAndView("lidinfo");
+        lidService.findById(id).ifPresent(lid -> modelAndView.addObject(lid));
+        return modelAndView;
     }
 }
